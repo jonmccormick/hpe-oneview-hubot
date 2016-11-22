@@ -26,13 +26,19 @@ export default class ServerProfilesListener extends Listener {
   constructor(robot, client, transform, serverHardware) {
     super(robot, client, transform);
     this.serverHardware = serverHardware;
+    this.capabilities = "Server Profile commands:\n";
 
     this.respond(/(?:get|list|show) all (?:server ){0,1}profiles\.$/i, ::this.ListServerProfiles);
+    this.capabilities += " Show all (server) profiles.\n";
     this.respond(/(?:get|list|show) (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerProfile);
+    this.capabilities += " Show a specific (server) profile.\n";
     this.respond(/(?:get|list|show) (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i, ::this.ListServerProfileCompliancePreview);
+    this.capabilities += " Show a specific (server) profile compliance.\n";
     this.respond(/(?:update|make) (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i, ::this.HandleServerCompliantMessage);
+    this.capabilities += " Make a specific (server) profile compliant (or update its compliance).\n";
     this.respond(/(?:turn|power) on (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOnServerProfile);
     this.respond(/(?:turn|power) off (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOffServerProfile);
+    this.capabilities += " Power on/off a specific (server) profile.\n";
   }
 
   ListServerProfiles(msg) {

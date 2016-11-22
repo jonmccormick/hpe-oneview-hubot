@@ -28,16 +28,24 @@ export default class ServerProfileTemplateListener extends Listener {
     super(robot, client, transform);
     this.serverHardware = serverHardware;
     this.serverProfiles = serverProfiles;
+    this.capabilities = "Server Profile Template commands:\n";
 
     //these regexs are a little messy still
     this.respond(/(?:get|list|show) all (?:server profile ){0,1}templates\.$/i, ::this.ListServerProfileTemplates);
+    this.capabilities += " Show all (server) profile templates.\n";
     this.respond(/(?:get|list|show) available (?:hardware|targets) for (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetAvailableTargets);
+    this.capabilities += " Show available targets for a server profile template.\n";
     this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetDeployedProfiles);
+    this.capabilities += " Show profile(s) using a server profile template.\n";
     this.respond(/(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.DeployProfiles);
-    this.respond(/(?:flex)(?: the)? (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
+    this.capabilities += " Create profile(s) using a server profile template.\n";
+    this.respond(/(?:flex|grow)(?: the)? (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
+    this.capabilities += " Flex/grow a server profile template by a given amount.\n";
     this.respond(/(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.UnDeployProfiles);
     this.respond(/(?:undeploy|remove) (:<count>\d+) server[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.UnDeployProfiles);
+    this.capabilities += " Remove a number of profiles/servers from a profile template.\n";
     this.respond(/(?:fix)(?: all)? compliance(?: issues)? for (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?)\.$/i, ::this.FixCompliance);
+    this.capabilities += " Fix compliance for a profile template.\n";
   }
 
   __getAvailableTargets__(id, target) {

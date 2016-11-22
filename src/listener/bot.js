@@ -22,26 +22,30 @@ THE SOFTWARE.
 
 import Listener from './base-listener';
 
-export default class DeveloperListener extends Listener {
-  constructor(robot, client, transform) {
+import ServerProfilesListener from './server-profiles';
+
+export default class BotListener extends Listener {
+  constructor(robot, client, transform, developer,
+    serverHardware, serverProfiles, serverProfileTemplate) {
     super(robot, client, transform);
-    this.capabilities = "Developer commands:\n";
+    this.developer = developer;
+    this.serverHardware = serverHardware;
+    this.serverProfiles = serverProfiles;
+    this.serverProfileTemplate = serverProfileTemplate;
 
-    this.respond(/(?:get|list|show) \/rest\/(:<category>.*?)\/(:<id>[a-zA-Z0-9_-]*) json\.$/i, ::this.ListRaw);//Developer end point (echoes raw JSON)
-    this.capabilities += " List /rest/category/id json.\n";
-    this.respond(/(?:get|list|show) \/rest\/(:<category>.*?)\/(:<id>[a-zA-Z0-9_-]*) clean\.$/i, ::this.ListClean);//Developer end point (echoes a clean resource)
-    this.capabilities += " List /rest/category/id clean.\n";
+//    this.respond(/(?:get|list|show) \/rest\/(:<category>.*?)\/(:<id>[a-zA-Z0-9_-]*) json\.$/i, ::this.ListRaw);//Developer end point (echoes raw JSON)
+    this.respond(/help\.$/i, ::this.ListActions);//Developer end point (echoes a clean resource)
+    this.respond(/What can you do(?: for me){0,1}\.$/i, ::this.ListActions);//Developer end point (echoes a clean resource)
   }
 
-  ListRaw(msg) {
-    this.client.ClientConnection.get('/rest/' + msg.category + '/' + msg.id).then((res) => {
-      return this.transform.text(msg, JSON.stringify(res, null, '  '));
-    }).catch(this.error(msg));
+  ListActions(msg) {
+    return this.transform.text(msg, "I can do lots of things.  I can:\n" +
+      this.serverProfiles.capabilities +
+      this.serverProfileTemplate.capabilities +
+      this.serverHardware.capabilities +
+//      this.developer.capabilities +
+      "Just ask"
+    );
   }
 
-  ListClean(msg) {
-    this.client.ClientConnection.get('/rest/' +  msg.category + '/' + msg.id).then((res) => {
-      return this.transform.send(msg, res.members || res);
-    }).catch(this.error(msg));
-  }
 };

@@ -26,14 +26,19 @@ import MetricToPng from '../charting/chart';
 export default class ServerHardwareListener extends Listener {
   constructor(robot, client, transform) {
     super(robot, client, transform);
+    this.capabilities = "Server Hardware commands:\n";
 
     // Using a negative look-ahead on the string /rest/server-profiles to prevent
     // this listener to responding to power events on server profiles
     this.respond(/(?:will you |can you |please ){0,1}(?:turn|power) on (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)(?: please){0,1}\.$/i, ::this.PowerOn);
     this.respond(/(?:will you |can you |please ){0,1}(?:turn|power) off (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)(?: please){0,1}\.$/i, ::this.PowerOff);
+    this.capabilities += " Power on/off a specific (server) hardware.\n";
     this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, ::this.ListServerHardware);
+    this.capabilities += " List all (server) hardware.\n";
     this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
+    this.capabilities += " List a server hardware utilization.\n";
     this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
+    this.capabilities += " List a server profile utilization.\n";
   }
 
   PowerOnHardware(id, msg, suppress) {
