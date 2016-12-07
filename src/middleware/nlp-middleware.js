@@ -77,21 +77,22 @@ const sentenceTerminal = /\s*[.?!]{0,1}$/;
 export default (robot) => {
   robot.receiveMiddleware((context, next, done) => {
     const message = context.response.message.message || context.response.message;
-    console.log("context=", context);
-    console.log("next=", next);
-    console.log("done=", done);
-    console.log("message=", message);
-    console.log("message.text=", message.text);    const cleaned = message.text.replace(wordSpacer, ' ').replace(sentenceSpacer, "$1$2  ").trim();
-    let normalized = nlp.text(cleaned)/*.to_present().toAmerican()*/.toNormal();
-    if (normalized.contractions && normalized.contractions.expand) {
-      normalized = normalized.contractions.expand();
-    }
+    const cleaned = message.text.replace(wordSpacer, ' ').replace(sentenceSpacer, "$1$2  ").trim();
 
-    //Ensure that all sentences end with '.' a note, this will replace ! and ? with .
-    const cleanSentences = nlp.text(normalized.text()).sentences.map((s) => {
-      console.log("cleanSentences==>", s.str.trim().replace(sentenceTerminal, '.'));
-      return s.str.trim().replace(sentenceTerminal, '.');
-    }).join('  ');
+    let cleanSentences = null;
+    // if text contains IP address don't run through nlp_compromise
+    if (/(?:[0-9]{1,3}\.){3}[0-9]{1,3}/.test(cleaned)) {
+      cleanSentences = cleaned;
+    } else {
+      let normalized = nlp.text(cleaned)/*.to_present().toAmerican()*/.toNormal();
+      if (normalized.contractions && normalized.contractions.expand) {
+        normalized = normalized.contractions.expand();
+      }
+      //Ensure that all sentences end with '.' a note, this will replace ! and ? with .
+      cleanSentences = nlp.text(normalized.text()).sentences.map((s) => {
+        return s.str.trim().replace(sentenceTerminal, '.');
+      }).join('  ');
+    }
 
     const start = Date.now();
     const resolved = lex.resolveDevices(cleanSentences).trim();
